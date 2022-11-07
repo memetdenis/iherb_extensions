@@ -1,12 +1,18 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "IHERB",
 	"description": "IHERB",
 	"version": "1.0.0",
 	"icons": {"128": "iherb_128.png"},
-	"browser_action": {
+	"action": {
 		"default_icon": "iherb_128.png",
 		"default_popup": "popup.html"
 	},
+	"content_scripts": [
+		{
+			"matches": ["https://*.iherb.com/*"],
+			"js": ["popup.js", "jquery.js"]
+		}
+	],
 	"permissions": ["activeTab"]
 }
