@@ -7,6 +7,30 @@ start_fnc = setInterval(function(){
 }, 5000);
 
 var id = 1;
+var server_url = 'http://127.0.0.1/';
+var img_ok = 'https://e7.pngegg.com/pngimages/646/237/png-clipart-computer-icons-check-mark-best-choice-miscellaneous-angle-thumbnail.png';
+
+function add_history_price(data){
+	if(data.price.length>0){
+		let index;
+		let price_add = '<span style="color: #1976d2;">История цены:</span><br>';
+		for (index = 0; index < data.price.length; ++index) {
+			if(data.price[index]['price'] == data.price[index]['standard_price']){
+				price_add += `
+				<span style='font-weight: 700; margin-right: 8px;'>${data.price[index]['date_create']}</span> :
+				<span style='color: #707070; font-weight: 400;'>${data.symbol}${data.price[index]['standard_price']}</span>
+				<br>`;
+			}else{
+				price_add += `
+				<span style='font-weight: 700; margin-right: 8px;'>${data.price[index]['date_create']}</span> : 
+				<span style='color: #d32f2f; font-weight: 700; margin-right: 8px;'>${data.symbol}${data.price[index]['price']}</span>
+				<span style='color: #707070; font-weight: 400; text-decoration: line-through;'>${data.symbol}${data.price[index]['standard_price']}</span>
+				<br>`;
+			}
+		}
+		$('#pricing').append(price_add);
+	}
+}
 
 function start(){
 
@@ -31,13 +55,13 @@ function start(){
 					// Установим атрибут id , что бы можно было найти его после загрузки
 					this.setAttribute('id',`load_${id}`);
 
-					$.post( `http://127.0.0.1/iherb/json.php?type=3&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`}, function(data) {
+					$.post( `${server_url}iherb/json.php?type=3&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`}, function(data) {
 
-						let message = '<img src="https://e7.pngegg.com/pngimages/646/237/png-clipart-computer-icons-check-mark-best-choice-miscellaneous-angle-thumbnail.png" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">';
+						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">`;
 						if($(`#load_${data['id']}`)){
 							$(`#load_${data['id']}`).append(message);
+							add_history_price(data);
 						}
-						//console.log(data);
 					});
 				}
 				id++;
@@ -68,32 +92,6 @@ function start(){
 			meta += `${this.attributes[0]['nodeValue']}=${this.content};`;
 		});
 
-
-		$.post( "http://127.0.0.1/iherb/json.php?type=1", { name: `${name}`, specifications: `${specifications}`, rank: `${rank}`, pricing: `${pricing}`, image: `${image}` , content: `${content}` , meta: `${meta}` , language: `${language}`, product_id: `${product_id}`, currency: `${currency}` }, function(data) {
-			console.log(data);
-			if(data.price.length>1){
-				let index;
-				let price_add = '<span style="color: #1976d2;">История цены:</span><br>';
-				for (index = 0; index < data.price.length; ++index) {
-					if(data.price[index]['price'] == data.price[index]['standard_price']){
-						price_add += `
-						<span style='font-weight: 700; margin-right: 8px;'>${data.price[index]['date_create']}</span> :
-						<span style='color: #707070; font-weight: 400;'>${data.symbol}${data.price[index]['standard_price']}</span>
-						<br>`;
-					}else{
-						price_add += `
-						<span style='font-weight: 700; margin-right: 8px;'>${data.price[index]['date_create']}</span> : 
-						<span style='color: #d32f2f; font-weight: 700; margin-right: 8px;'>${data.symbol}${data.price[index]['price']}</span>
-						<span style='color: #707070; font-weight: 400; text-decoration: line-through;'>${data.symbol}${data.price[index]['standard_price']}</span>
-						<br>`;
-					}
-				}
-				$('#pricing').append(price_add);
-			}
-		} );
-
-		console.log(`Продукт: ${name}`);
-		console.log(`Продукт id: ${product_id}`);
 	}*/
 
 	// Множество карточек с товарами.
@@ -118,14 +116,11 @@ function start(){
 					// Установим атрибут id , что бы можно было найти его после загрузки
 					this.setAttribute('id',`load_${id}`);
 
-					$.post( `http://127.0.0.1/iherb/json.php?type=2&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`}, function(data) {
-
-						let message = '<img src="https://e7.pngegg.com/pngimages/646/237/png-clipart-computer-icons-check-mark-best-choice-miscellaneous-angle-thumbnail.png" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">';
+					$.post( `${server_url}iherb/json.php?type=2&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`}, function(data) {
+						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">`;
 						if($(`#load_${data['id']}`)){
 							$(`#load_${data['id']}`).append(message);
 						}
-						//console.log(data);
-
 					});
 				}
 				id++;
