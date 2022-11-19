@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "IHERB",
-	"description": "IHERB",
+	"description": "Показываем историю цен на сайте IHERB",
 	"version": "0.0.2",
 	"icons": {"128": "iherb_128.png"},
 	"action": {

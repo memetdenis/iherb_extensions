@@ -7,9 +7,11 @@ start_fnc = setInterval(function(){
 }, 5000);
 
 var id = 1;
-var server_url = 'http://127.0.0.1/';
+var server_url = 'https://iherb.memet.ru/';
 var img_ok = 'https://e7.pngegg.com/pngimages/646/237/png-clipart-computer-icons-check-mark-best-choice-miscellaneous-angle-thumbnail.png';
 
+
+//***************************************************************************************************************************************************** */
 function add_history_price(data){
 	if(data.price.length>0){
 		let index;
@@ -28,14 +30,38 @@ function add_history_price(data){
 				<br>`;
 			}
 		}
-		$('#pricing').append(price_add);
+		$('#product-action').append(price_add);
 	}
 }
 
+//***************************************************************************************************************************************************** */
+function add_history_price_mini(data){
+	let price_add = '';
+
+	if(data.price.length>1){
+		
+		if(data.price[1]['price'] == data.price[1]['standard_price']){
+			price_add += `
+			<span style='font-weight: 700; margin-right: 8px;'>${data.price[1]['date_create']}</span> :
+			<span style='color: #707070; font-weight: 400;'>${data.symbol}${data.price[1]['standard_price']}</span>
+			<br>`;
+		}else{
+			price_add += `
+			<span style='font-weight: 700; margin-right: 8px;'>${data.price[1]['date_create']}</span> : 
+			<span style='color: #d32f2f; font-weight: 700; margin-right: 8px;'>${data.symbol}${data.price[1]['price']}</span>
+			<span style='color: #707070; font-weight: 400; text-decoration: line-through;'>${data.symbol}${data.price[1]['standard_price']}</span>
+			<br>`;
+		}
+		
+	}
+	return price_add;
+}
+//***************************************************************************************************************************************************** */
 function start(){
 
 	let language 		= $('.language-select').text().replace('\n','').trim();
 	let currency		= $('.currency-select').text().replace('\n','').trim();
+	let country			= $('.country-select').text().replace('\n','').trim();
 
 	// Один товар
 	if($('.product-detail-container').length>0){
@@ -55,7 +81,7 @@ function start(){
 					// Установим атрибут id , что бы можно было найти его после загрузки
 					this.setAttribute('id',`load_${id}`);
 
-					$.post( `${server_url}iherb/json.php?type=3&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`}, function(data) {
+					$.post( `${server_url}json.php?type=3&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`, country: `${country}`}, function(data) {
 
 						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">`;
 						if($(`#load_${data['id']}`)){
@@ -66,7 +92,7 @@ function start(){
 				}
 				id++;
 			}
-		});		
+		});
 	}
 	// Один товар
 	/*
@@ -95,29 +121,54 @@ function start(){
 	}*/
 
 	// Множество карточек с товарами.
+	if($('.product-inner-wide')){
+
+		// Количество карточек с этим тегом.
+		console.log($('.product-inner-wide').length);
+
+		let catalog = $('#breadCrumbs').html();
+		$('.product-inner-wide').each(function() {
+			let load = true; // Нужно загружать?
+			// Если есть атрибут id , то загружать не надо.
+			if(this.getAttribute('id')){
+				load = false;
+			}else{
+				let html = this.innerHTML;
+				if(html.indexOf('<a class="product-image product-link"')>=0){load = false;}
+				if(load){
+					// Установим атрибут id , что бы можно было найти его после загрузки
+					this.setAttribute('id',`load_${id}`);
+					$.post( `${server_url}json.php?type=4&id=${id}`, { html: `${html.replace(/\'/g,'')}`, catalog: `${catalog.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`, country: `${country}`}, function(data) {
+						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере"> `+add_history_price_mini(data);
+						if($(`#load_${data['id']}`)){
+							$(`#load_${data['id']}`).append(message);
+						}
+					});
+				}
+				id++;
+			}
+		});
+	}
+
+	// Множество карточек с товарами.
 	if($('.product-inner')){
 
 		// Количество карточек с этим тегом.
 		console.log($('.product-inner').length);
 
 		$('.product-inner').each(function() {
-
 			let load = true; // Нужно загружать?
-
 			// Если есть атрибут id , то загружать не надо.
 			if(this.getAttribute('id')){
 				load = false;
 			}else{
-
 				let html = this.innerHTML;
 				if(html.indexOf('<a class="product-image product-link"')>=0){load = false;}
-
 				if(load){
 					// Установим атрибут id , что бы можно было найти его после загрузки
 					this.setAttribute('id',`load_${id}`);
-
-					$.post( `${server_url}iherb/json.php?type=2&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`}, function(data) {
-						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">`;
+					$.post( `${server_url}json.php?type=2&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`, country: `${country}`}, function(data) {
+						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере"> `+add_history_price_mini(data);
 						if($(`#load_${data['id']}`)){
 							$(`#load_${data['id']}`).append(message);
 						}
