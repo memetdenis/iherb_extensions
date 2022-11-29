@@ -8,7 +8,8 @@ start_fnc = setInterval(function(){
 
 var id = 1;
 var server_url = 'https://iherb.memet.ru/';
-var img_ok = 'https://e7.pngegg.com/pngimages/646/237/png-clipart-computer-icons-check-mark-best-choice-miscellaneous-angle-thumbnail.png';
+//var server_url = 'http://localhost/iherb/';
+var img_ok = 'https://iherb.memet.ru/img/checked.png';
 
 
 //***************************************************************************************************************************************************** */
@@ -35,22 +36,33 @@ function add_history_price(data){
 }
 
 //***************************************************************************************************************************************************** */
+function add_rating(data){
+	if(data.rating>0){
+		let rating = $(`#load_${data['id']} .rating span`).text().trim();
+		let html = `<div style = "position:relative; white-space: nowrap; display:inline-block;">${rating}<div style="color: green; font-size: 9px; position: absolute; top: -4px; right: -21px; white-space: nowrap;">+${data.rating}</div></div>`;
+		$(`#load_${data['id']} .rating span`).html(html);
+	}
+}
+
+//***************************************************************************************************************************************************** */
 function add_history_price_mini(data){
 	let price_add = '';
 
 	if(data.price.length>1){
-		
+		//price_add = '<br>';
 		if(data.price[1]['price'] == data.price[1]['standard_price']){
 			price_add += `
-			<span style='font-weight: 700; margin-right: 8px;'>${data.price[1]['date_create']}</span> :
+			<div style="position:relative; white-space: nowrap; display:inline-block;font-size: 14px;">
+			<div style="position: absolute;top: -4px;right: -56px;"><span style='font-size: 10px;'>${data.price[1]['date_create']}</span></div>
 			<span style='color: #707070; font-weight: 400;'>${data.symbol}${data.price[1]['standard_price']}</span>
-			<br>`;
+			</div>`;
 		}else{
 			price_add += `
-			<span style='font-weight: 700; margin-right: 8px;'>${data.price[1]['date_create']}</span> : 
-			<span style='color: #d32f2f; font-weight: 700; margin-right: 8px;'>${data.symbol}${data.price[1]['price']}</span>
+			<div style="position:relative; white-space: nowrap; display:inline-block;font-size: 14px;">
+			<div style="position: absolute;top: -4px;right: -56px;"><span style='font-size: 10px;'>${data.price[1]['date_create']}</span></div> 
+			<span style='color: #d32f2f; font-weight: 700; margin-right: 6px;'>${data.symbol}${data.price[1]['price']}</span>
 			<span style='color: #707070; font-weight: 400; text-decoration: line-through;'>${data.symbol}${data.price[1]['standard_price']}</span>
-			<br>`;
+			</div>`;
 		}
 		
 	}
@@ -64,7 +76,7 @@ function start(){
 	let country			= $('.country-select').text().replace('\n','').trim();
 
 	// Один товар
-	if($('.product-detail-container').length>0){
+	if($('.product-detail-container').length){
 		$('.product-detail-container').each(function() {
 
 			let load = true; // Нужно загружать?
@@ -83,7 +95,7 @@ function start(){
 
 					$.post( `${server_url}json.php?type=3&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`, country: `${country}`}, function(data) {
 
-						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере">`;
+						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" title="Сохранено на сервере">`;
 						if($(`#load_${data['id']}`)){
 							$(`#load_${data['id']}`).append(message);
 							add_history_price(data);
@@ -121,12 +133,16 @@ function start(){
 	}*/
 
 	// Множество карточек с товарами.
-	if($('.product-inner-wide')){
+	if($('.product-inner-wide').length){
 
 		// Количество карточек с этим тегом.
 		console.log($('.product-inner-wide').length);
 
-		let catalog = $('#breadCrumbs').html();
+		let catalog = '';
+		if($('#breadCrumbs').length){
+			catalog = $('#breadCrumbs').html();
+		}
+
 		$('.product-inner-wide').each(function() {
 			let load = true; // Нужно загружать?
 			// Если есть атрибут id , то загружать не надо.
@@ -139,9 +155,10 @@ function start(){
 					// Установим атрибут id , что бы можно было найти его после загрузки
 					this.setAttribute('id',`load_${id}`);
 					$.post( `${server_url}json.php?type=4&id=${id}`, { html: `${html.replace(/\'/g,'')}`, catalog: `${catalog.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`, country: `${country}`}, function(data) {
-						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере"> `+add_history_price_mini(data);
+						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" title="Сохранено на сервере"> `+add_history_price_mini(data);
 						if($(`#load_${data['id']}`)){
 							$(`#load_${data['id']}`).append(message);
+							add_rating(data);
 						}
 					});
 				}
@@ -151,7 +168,7 @@ function start(){
 	}
 
 	// Множество карточек с товарами.
-	if($('.product-inner')){
+	if($('.product-inner').length){
 
 		// Количество карточек с этим тегом.
 		console.log($('.product-inner').length);
@@ -168,9 +185,15 @@ function start(){
 					// Установим атрибут id , что бы можно было найти его после загрузки
 					this.setAttribute('id',`load_${id}`);
 					$.post( `${server_url}json.php?type=2&id=${id}`, { html: `${html.replace(/\'/g,'')}`, language: `${language}`, currency: `${currency}`, id: `${id}`, country: `${country}`}, function(data) {
-						let message = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" alt="Сохранено на сервере"> `+add_history_price_mini(data);
 						if($(`#load_${data['id']}`)){
-							$(`#load_${data['id']}`).append(message);
+							//let img_load = `<img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" title="Сохранено на сервере">`;
+							let img_load = `<div style="position: absolute;top: 0px;right: 0px;"><img src="${img_ok}" style="width: 16px; height: 16px; margin-bottom: -3px;" title="Сохранено на сервере"></div>`;
+							//let product = $(`#load_${data['id']}`).html();
+							//product = `<div style = "position:relative; white-space: nowrap; display:inline-block;">${product}<div style="color: green; font-size: 9px; position: absolute; top: -4px; right: -21px; white-space: nowrap;">+${img_load}</div></div>`;
+							//$(`#load_${data['id']}`).html(product);
+							$(`#load_${data['id']}`).prepend(img_load);
+							$(`#load_${data['id']}`).append(add_history_price_mini(data));
+							add_rating(data);
 						}
 					});
 				}
